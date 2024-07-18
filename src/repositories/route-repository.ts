@@ -8,12 +8,16 @@ interface IRouteRepository {
 class RouteRepository implements IRouteRepository {
   getAll(searchParams: IRouteFilter): Promise<Route[]> {
     let query: string = 'SELECT * FROM route';
+    let queryConditions = [];
 
     if(searchParams.countries && (typeof searchParams.countries === 'string' || searchParams.countries.length > 0)) {
-      if (typeof searchParams.countries === 'string') query = `${query} WHERE country = '${searchParams.countries}'`;
-      else query = `${query} WHERE country in (${searchParams.countries.map(country => `'${country}'`).join()})`;
-      //TODO add filters, edit query
+      if (typeof searchParams.countries === 'string') queryConditions.push(`country = '${searchParams.countries}'`);
+      else queryConditions.push(`country in (${searchParams.countries.map(country => `'${country}'`).join()})`);
     }
+    if(searchParams.difficulty) queryConditions.push(`difficulty = '${searchParams.difficulty}'`);
+    if(searchParams.type) queryConditions.push(`type = '${searchParams.type}'`);
+
+    if(queryConditions.length > 0) query = `${query} WHERE ${queryConditions.join(' AND ')}`
 
     console.log(query);
 
