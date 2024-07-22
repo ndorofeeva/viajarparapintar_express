@@ -11,6 +11,7 @@ class RouteRoutes {
 
   intializeRoutes() {
     this.router.get("/", this.controller.getAll);
+    this.router.get("/countries", this.controller.getCountries);
   }
 }
 

@@ -1,6 +1,19 @@
 import { RowDataPacket } from "mysql2"
 
-export default interface Route extends RowDataPacket {
+export default interface IRouteData {
+  routes: IRoute[];
+  numberOfPages: number;
+}
+
+export interface IRoutesCount extends RowDataPacket {
+  count: number;
+}
+
+export interface ICountries extends RowDataPacket {
+  country: string;
+}
+
+export interface IRoute extends RowDataPacket {
   id: number,
   title: string,
   distance: number,
@@ -14,5 +27,7 @@ export default interface Route extends RowDataPacket {
 export interface IRouteFilter {
   countries?: string | string[],
   difficulty?: string,
-  type: string
+  type: string,
+  page: number,
+  itemsPerPage: number;
 }

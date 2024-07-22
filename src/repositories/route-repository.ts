@@ -1,13 +1,47 @@
 import connection from '../db';
-import Route, { IRouteFilter } from '../models/route-model';
+import { IRouteFilter, IRoute, IRoutesCount, ICountries } from '../models/route-model';
 
 interface IRouteRepository {
-  getAll(searchParams: IRouteFilter): Promise<Route[]>;
+  getAll(searchParams: IRouteFilter): Promise<IRoute[]>;
 }
 
 class RouteRepository implements IRouteRepository {
-  getAll(searchParams: IRouteFilter): Promise<Route[]> {
-    let query: string = 'SELECT * FROM route';
+  getAll(searchParams: IRouteFilter): Promise<IRoute[]> {
+    const query = `SELECT * FROM route 
+      ${this.getConditionalQuery(searchParams)} 
+      limit ${(searchParams.page - 1) * searchParams.itemsPerPage}, ${searchParams.itemsPerPage}`;
+
+    return new Promise((resolve, reject) => {
+      connection.query<IRoute[]>(query, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+    });
+  }
+
+  countRoutes(searchParams: IRouteFilter): Promise<IRoutesCount[]> {
+    const query = `SELECT count(id) as count FROM route ${this.getConditionalQuery(searchParams)}`;
+    
+    return new Promise((resolve, reject) => {
+      connection.query<IRoutesCount[]>(query, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+    });
+  }
+
+  getCountries(): Promise<ICountries[]> {
+    let query = 'SELECT distinct country FROM route';
+
+    return new Promise((resolve, reject) => {
+      connection.query<ICountries[]>(query, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+    });
+  }
+
+  private getConditionalQuery(searchParams: IRouteFilter) {
     let queryConditions = [];
 
     if(searchParams.countries && (typeof searchParams.countries === 'string' || searchParams.countries.length > 0)) {
@@ -17,16 +51,7 @@ class RouteRepository implements IRouteRepository {
     if(searchParams.difficulty) queryConditions.push(`difficulty = '${searchParams.difficulty}'`);
     if(searchParams.type) queryConditions.push(`type = '${searchParams.type}'`);
 
-    if(queryConditions.length > 0) query = `${query} WHERE ${queryConditions.join(' AND ')}`
-
-    console.log(query);
-
-    return new Promise((resolve, reject) => {
-      connection.query<Route[]>(query, (err, res) => {
-        if (err) reject(err);
-        else resolve(res);
-      });
-    });
+    return queryConditions.length > 0 ? `WHERE ${queryConditions.join(' AND ')}` : '';
   }
 }
 
