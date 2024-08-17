@@ -10,8 +10,9 @@ class RouteRoutes {
   }
 
   intializeRoutes() {
-    this.router.get("/", this.controller.getAll);
+    this.router.get("/", this.controller.getPreview);
     this.router.get("/countries", this.controller.getCountries);
+    this.router.get("/details/:id", this.controller.get);
   }
 }
 

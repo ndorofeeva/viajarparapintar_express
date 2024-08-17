@@ -1,16 +1,16 @@
 import { RowDataPacket } from "mysql2"
 
 export default interface IRouteData {
-  routes: IRoute[];
-  numberOfPages: number;
+  routes: IRoute[],
+  numberOfPages: number
 }
 
 export interface IRoutesCount extends RowDataPacket {
-  count: number;
+  count: number
 }
 
 export interface ICountries extends RowDataPacket {
-  country: string;
+  country: string
 }
 
 export interface IRoute extends RowDataPacket {
@@ -21,7 +21,13 @@ export interface IRoute extends RowDataPacket {
   type: string,
   difficulty: string,
   country: string,
-  imagepath: string
+  previewImage: string
+}
+
+export interface IRouteDetails extends IRoute {
+  highlightedText: string,
+  mainText: string,
+  photos: string
 }
 
 export interface IRouteFilter {
@@ -29,5 +35,5 @@ export interface IRouteFilter {
   difficulty?: string,
   type: string,
   page: number,
-  itemsPerPage: number;
+  itemsPerPage: number
 }

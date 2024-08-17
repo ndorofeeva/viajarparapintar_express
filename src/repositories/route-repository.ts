@@ -1,18 +1,32 @@
 import connection from '../db';
-import { IRouteFilter, IRoute, IRoutesCount, ICountries } from '../models/route-model';
+import { IRouteFilter, IRoute, IRoutesCount, ICountries, IRouteDetails } from '../models/route-model';
 
 interface IRouteRepository {
-  getAll(searchParams: IRouteFilter): Promise<IRoute[]>;
+  getPreview(searchParams: IRouteFilter): Promise<IRoute[]>;
 }
 
 class RouteRepository implements IRouteRepository {
-  getAll(searchParams: IRouteFilter): Promise<IRoute[]> {
-    const query = `SELECT * FROM route 
+  getPreview(searchParams: IRouteFilter): Promise<IRoute[]> {
+    const query = `SELECT id, title, distance, type, difficulty, country, preview_image as previewImage FROM route 
       ${this.getConditionalQuery(searchParams)} 
       limit ${(searchParams.page - 1) * searchParams.itemsPerPage}, ${searchParams.itemsPerPage}`;
 
     return new Promise((resolve, reject) => {
       connection.query<IRoute[]>(query, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+    });
+  }
+
+  get(id: number): Promise<IRouteDetails[]> {
+    const query = `SELECT 
+    r.id, r.title, r.distance, r.type, r.difficulty, r.country, r.preview_image as previewImage,
+    r.highlighted_text as highlightedText, r.main_text as mainText, rf.photo_name as photos
+    FROM route as r join route_photos as rf on rf.route_id = r.id where r.id = ${id}`;
+
+    return new Promise((resolve, reject) => {
+      connection.query<IRouteDetails[]>(query, (err, res) => {
         if (err) reject(err);
         else resolve(res);
       });

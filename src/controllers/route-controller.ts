@@ -3,7 +3,7 @@ import RouteRepository from '../repositories/route-repository'
 import IRouteData, { ICountries, IRouteFilter } from '../models/route-model';
 
 export default class RouteController {
-  async getAll(req: Request, res: Response) {
+  async getPreview(req: Request, res: Response) {
     const countries = typeof req.query.countries === 'string' || Array.isArray(req.query.countries) ? req.query.countries : '';
     const difficulty = typeof req.query.difficulty === 'string' ? req.query.difficulty : '';
     const type = typeof req.query.type === 'string' ? req.query.type : '';
@@ -26,7 +26,7 @@ export default class RouteController {
         page: page,
         itemsPerPage: itemsPerPage,
       };
-      const routes = await RouteRepository.getAll(searchParams);
+      const routes = await RouteRepository.getPreview(searchParams);
       const numberOfRoutesResult = await RouteRepository.countRoutes(searchParams);
       const numberOfPages = Math.ceil(numberOfRoutesResult[0].count / searchParams.itemsPerPage);
       const routeData: IRouteData = {
@@ -46,6 +46,20 @@ export default class RouteController {
       const countryObjects: ICountries[] = await RouteRepository.getCountries();
       const countries = countryObjects.map(countryObj => countryObj.country);
       res.status(200).send(countries);
+    } catch (err) {
+      res.status(500).send({
+        message: "Error occurred while retrieving routes."
+      });
+    }
+  }
+
+  async get(req: Request, res: Response) {
+    const id = typeof req.params.id === 'string' ? parseInt(req.params.id, 10) : 0;
+
+    try {
+      const routeDetailsData = await RouteRepository.get(id);
+      const routeDetails = {...routeDetailsData[0], photos: routeDetailsData.map(data => data.photos) };
+      res.status(200).send(routeDetails);
     } catch (err) {
       res.status(500).send({
         message: "Error occurred while retrieving routes."
